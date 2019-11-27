@@ -1,4 +1,5 @@
-function [Kp, Ki, Kd, Ti, Td] = tune191123(di = 0, type = 0, publish = 0, utitle = '')
+function [Kp, Ki, Kd, Ti, Td] = tune(data, spec, scurve, maximum, ...
+  smoothfactors, di = 0, type = 0, publish = 0, utitle = '')
 %
 % Ziegler-Nichols’ Open-Loop Method
 %
@@ -11,25 +12,25 @@ function [Kp, Ki, Kd, Ti, Td] = tune191123(di = 0, type = 0, publish = 0, utitle
 addpath("C:/home/orri/src/octave/functions/");
 
 %
-show = 7000;
-count = 4300;
-downsamplesize = 10;
-
-% Reading from S curve
-LevelY = 24;            % The level value
-LevelX0 = 0;            % The input at the level
-X0Y = 39;               % The step change in the input
-KmY = 130;              % The Km value (leveling after the step)
-TdeadStart = 129;       % The start of the step
-InflectionI = 13;       % Inflection point index
-InflectionMaxY = 150;   % The maximum level for the inflection slope line
-
-MaximumInput = 255;     % The maximum input
-MaximumValue = 250;     % The maximum of the working range
+show = spec.Show;
+count = spec.Count;
+downsamplesize = spec.DownSample;
 
 % Smooth factors
-smooth_d = 2;
-smooth_stdev = 1;
+smooth_d = smoothfactors.d;
+smooth_stdev = smoothfactors.stdev;
+
+% Reading from S curve
+LevelY = scurve.LevelY;                 % The level value
+LevelX0 = scurve.LevelX0;               % The input at the level
+X0Y = scurve.X0Y;                       % The step change in the input
+KmY = scurve.KmY;                       % The Km value (leveling after the step)
+TdeadStart = scurve.TdeadStart;         % The start of the step
+InflectionI = scurve.InflectionI;       % Inflection point index
+InflectionMaxY = scurve.InflectionMaxY; % The maximum level for the inflection slope line
+
+MaximumInput = maximum.Input;           % The maximum input
+MaximumValue = maximum.Value;           % The maximum of the working range
 
 % Packages used
 pkg load signal;
@@ -38,18 +39,18 @@ pkg load data-smoothing;
 % Adjusted inflection point index
 AdjustInflectionI = InflectionI + di;
 
-raw = csvread("C:/temp/pid/november/191123.csv");
-rawtime = calculatetime(raw, 0);  %Convert time to seconds
+%raw = csvread("C:/temp/pid/november/191123.csv");
+rawtime = calculatetime(data, 0);  %Convert time to seconds
 
 % Show  more of the data than is used in the analizes
-showmanual = downsample(raw(1:show,3), downsamplesize);
-showtemperature = downsample(raw(1:show,4), downsamplesize);
+showmanual = downsample(data(1:show,3), downsamplesize);
+showtemperature = downsample(data(1:show,4), downsamplesize);
 showtime = downsample(rawtime(1:show), downsamplesize);
 
 % Downsample to reduce calculation time
-manual = downsample(raw(1:count,3), downsamplesize);
+manual = downsample(data(1:count,3), downsamplesize);
 time = downsample(rawtime(1:count), downsamplesize);
-temperature = downsample(raw(1:count,4), downsamplesize);
+temperature = downsample(data(1:count,4), downsamplesize);
 
 % Smooth out the S curve
 [yh, lambda] = regdatasmooth(...
