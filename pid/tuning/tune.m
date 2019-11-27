@@ -91,15 +91,15 @@ Tm = TmX - TdeadEnd;
 if length(utitle) > 0
   TextTitle = "Tune PID - ";
   TextTitle = strcat(TextTitle, utitle);
-TextTitle
-  TitleText = "Tune PID";
+else
+  TextTitle = "Tune PID";
 endif
 
 TitleText = strcat(TextTitle, "\n");
 
 printf("\n\n===============================================================\n");
 printf(TitleText);
-printf("===============================================================\m");
+printf("===============================================================\n");
 
 printf("X0 ratio value is %.4f\n", X0);
 printf("X0 ratio is calculated as the ratio of the distance %.0f betweenn\n", ...
